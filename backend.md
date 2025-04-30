@@ -2,7 +2,7 @@
 
 ## Task 1: Install Python
 
-```bash
+```python
 python --version
 ```
 
@@ -10,15 +10,17 @@ python --version
 
 ## Task 2: Virtual Environment Installation
 
-```bash
+```python
 python -m venv env
+```
+to activate:
+```python
+env\Scripts\activate
 ```
 
 ---
 
-## Task 3: Feeding Your Project — The Grocery List Edition
-
-Make a new file and name it `requirements.txt`:
+## Task 3: Make a new file and name it `requirements.txt`:
 
 ```
 asgiref
@@ -51,9 +53,7 @@ django-admin startapp api
 
 ---
 
-## Task 5: Turning Your Django Setup Into a Party!
-
-Configure `settings.py` in the `backend` folder:
+## Task 5: Configure `settings.py` in the `backend` folder:
 
 ```python
 from datetime import timedelta
@@ -61,22 +61,40 @@ from dotenv import load_dotenv
 import os
 
 load_dotenv()
+```
 
+In ALLOWED_HOST paste this
+```python
 ALLOWED_HOSTS = ["*"]
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+}
+
 ```
 
 In `INSTALLED_APPS`, add:
 
 ```python
-‘api’,
-‘rest_framework’,
-‘corsheaders’,
+"api",
+"rest_framework",
+"corsheaders",
 ```
 
 In `MIDDLEWARE`, add:
 
 ```python
-’corsheaders.middleware.CorsMiddleware’,
+"corsheaders.middleware.CorsMiddleware",
 ```
 
 At the end of the script, add:
@@ -86,9 +104,11 @@ CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWS_CREDENTIALS = True
 ```
 
+Drag the requirements.txt inside the backend folder
+
 ---
 
-## Task 6: Understanding JWT Tokens – Unlocking the Secret Doors of Your App!
+## Task 6: Understanding JWT Tokens 
 
 Make a new file inside the `api` folder and name it `serializers.py`, and paste this:
 
@@ -100,27 +120,23 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["id", "username", "password"]
-
-    extra_kwargs = {"password": {"write_only": True}}
+        extra_kwargs = {"password": {"write_only": True}}
 
     def create(self, validated_data):
-        print(validated_data)
         user = User.objects.create_user(**validated_data)
         return user
 ```
 
 ---
 
-## Task 7: Let’s Get Those Users Registered!
-
-Configure `views.py`:
+## Task 7: Configure `views.py`:
 
 ```python
 from django.shortcuts import render
 from django.contrib.auth.models import User
 from rest_framework import generics
 from .serializers import UserSerializer
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 class CreateUserView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -130,13 +146,11 @@ class CreateUserView(generics.CreateAPIView):
 
 ---
 
-## Task 8: Set Up the Roads for Our App!
-
-Configure `backend/urls.py`:
+## Task 8: Configure `backend/urls.py`:
 
 ```python
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path,include
 from api.views import CreateUserView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
@@ -151,9 +165,7 @@ urlpatterns = [
 
 ---
 
-## Task 9: Let’s Get This Party Started!
-
-Run your server:
+## Task 9: Run your server:
 
 ```bash
 python manage.py makemigrations
@@ -166,18 +178,17 @@ python manage.py runserver
 ## Task 10: Navigate to Your URL
 
 - `/api/user/register`
-- `/api/user/token`
+- `/api/token`
 - `/api/token/refresh`
 
 ---
 
-## Task 11: The Blueprint of Your Notes App!
-
-`api/models.py`:
+## Task 11: Configure `api/models.py`:
 
 ```python
 from django.db import models
 from django.contrib.auth.models import User
+
 
 class Note(models.Model):
     title = models.CharField(max_length=100)
@@ -191,9 +202,7 @@ class Note(models.Model):
 
 ---
 
-## Task 12: Turning Notes into a Work of Art!
-
-Insert these in `serializers.py`:
+## Task 12: Insert these in `serializers.py`:
 
 ```python
 from .models import Note
@@ -207,9 +216,9 @@ class NoteSerializer(serializers.ModelSerializer):
 
 ---
 
-## Task 13: The Power of Creating and Deleting Notes!
+## Task 13: Insert these in `views.py`. 
 
-Insert these in `views.py`. Add `NoteSerializer` beside `UserSerializer`:
+Add `, NoteSerializer` beside `UserSerializer`:
 
 ```python
 from .models import Note
@@ -239,9 +248,7 @@ class NoteDelete(generics.DestroyAPIView):
 
 ---
 
-## Task 14: Protecting Your Notes Like a Boss!
-
-Make a new file inside the `api` folder and name it `urls.py`:
+## Task 14: Make a new file inside the `api` folder and name it `urls.py`:
 
 ```python
 from django.urls import path
@@ -255,12 +262,16 @@ urlpatterns = [
 
 ---
 
-## Task 15: The Party Starts!
-
-In `backend/urls.py`:
+## Task 15: Insert this in `backend/urls.py`:
 
 ```python
 path("api/", include("api.urls")),
 ```
 
 After this, do **Task 9** again.
+
+## Task 16: Navigate in the url in your browser
+
+- `/api/token/refresh`
+- `/api/token`
+- `api/notes`
